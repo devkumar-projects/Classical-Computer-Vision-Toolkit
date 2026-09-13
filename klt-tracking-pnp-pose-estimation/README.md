@@ -83,10 +83,10 @@ The full diagnostic set (131 frames covering frame 0, every frame from 300 onwar
 
 ```bash
 pip install opencv-python numpy matplotlib
-python3 KLT_PNP.py
+python3 KLT_PNP.py --video box_video_data.avi --output-dir outputs
 ```
 
-The script opens the first frame and asks you to click the tracked corners **in order** (4 points, then 6 points for the second run); press **ENTER** to confirm each set. It then plays back the tracking live, writes an augmented video (`augmented_4pts.avi` / `augmented_6pts.avi`) with the projected 3D wireframe overlaid, and finally saves `eqm_comparison.png` — a live-generated version of the comparison plot shown above.
+The script opens the first frame and asks you to click the tracked corners **in order** (4 points, then 6 points for the second run); press **ENTER** to confirm each set. It then plays back the tracking live, writes augmented videos and debug frames under the selected output directory, and finally saves `eqm_comparison.png` there — a live-generated version of the comparison plot shown above.
 
 > **Note on reproducibility**: point initialization is a manual mouse-click step by design (this mirrors how markerless AR trackers are typically bootstrapped), so results aren't produced by an automated headless run — the numbers and frames above come directly from an actual recorded session with this code.
 
