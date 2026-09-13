@@ -1,7 +1,11 @@
 import cv2
-import numpy as np
-import matplotlib.pyplot as plt
+import argparse
 import os
+from pathlib import Path
+
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
 
 # 3D coordinates of the 8 box corners (mm converted to meters)
 objPoints = np.array([
@@ -208,8 +212,10 @@ def save_debug_frame(fpath, frame, frame_idx, labels_pts,
     cv2.imwrite(fpath, dbg)
 
 
-def run_pipeline(video_path, point_indices, label, debug=False):
-    cap = cv2.VideoCapture(video_path)
+def run_pipeline(video_path, point_indices, label, debug=False, output_dir='.'):
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    cap = cv2.VideoCapture(os.fspath(video_path))
     ret, first_frame = cap.read()
     if not ret:
         raise IOError("Cannot open video")
@@ -222,8 +228,8 @@ def run_pipeline(video_path, point_indices, label, debug=False):
 
     debug_dir = None
     if debug:
-        debug_dir = f"{DEBUG_DIR_SUFFIX}_{label}"
-        os.makedirs(debug_dir, exist_ok=True)
+        debug_dir = output_dir / f"{DEBUG_DIR_SUFFIX}_{label}"
+        debug_dir.mkdir(parents=True, exist_ok=True)
         print(f"  [DEBUG] → {debug_dir}/")
         print(f"    frame 0 | frames >= {DEBUG_FROM} | frames with any point rp > {DEBUG_POINT_THRESH}px")
 
@@ -269,7 +275,7 @@ def run_pipeline(video_path, point_indices, label, debug=False):
     pts_prev    = np.array(clicked, dtype=np.float32).reshape(N, 1, 2)
     obj_tracked = objPoints[point_indices]
 
-    out_name = f"augmented_{label}.avi"
+    out_name = os.fspath(output_dir / f"augmented_{label}.avi")
     out = cv2.VideoWriter(out_name, cv2.VideoWriter_fourcc(*'XVID'), fps, (W, H))
 
     eqm_list             = []
@@ -375,7 +381,7 @@ def run_pipeline(video_path, point_indices, label, debug=False):
                           np.nanmax(reproj_err_all) > DEBUG_POINT_THRESH
             if frame_idx >= DEBUG_FROM or any_high_rp:
                 tag = "_HIGH" if (any_high_rp and frame_idx < DEBUG_FROM) else ""
-                fpath = os.path.join(debug_dir, f"frame_{frame_idx:04d}{tag}.jpg")
+                fpath = os.fspath(debug_dir / f"frame_{frame_idx:04d}{tag}.jpg")
                 # Pass frame directly (points already drawn) — save_debug_frame
                 # only adds the bottom diagnostic panel on top
                 save_debug_frame(
@@ -405,14 +411,33 @@ def run_pipeline(video_path, point_indices, label, debug=False):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="KLT + PnP box tracking pipeline")
+    parser.add_argument(
+        "--video",
+        type=Path,
+        default=Path(__file__).with_name("box_video_data.avi"),
+        help="Input video (default: the bundled box_video_data.avi)",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=Path(__file__).with_name("outputs"),
+        help="Directory for augmented videos, debug frames and plots",
+    )
+    args = parser.parse_args()
 
-    VIDEO = "box_video_data.avi"
+    video_path = args.video.expanduser().resolve()
+    output_dir = args.output_dir.expanduser().resolve()
+    if not video_path.is_file():
+        raise FileNotFoundError(f"Input video not found: {video_path}")
 
     print("\n>>> Q1-Q5: 4 points")
-    eqm_4 = run_pipeline(VIDEO, IDX_4PTS, label="4pts", debug=False)
+    eqm_4 = run_pipeline(video_path, IDX_4PTS, label="4pts", debug=False,
+                          output_dir=output_dir)
 
     print("\n>>> Q6: 6 points")
-    eqm_6 = run_pipeline(VIDEO, IDX_6PTS, label="6pts", debug=True)
+    eqm_6 = run_pipeline(video_path, IDX_6PTS, label="6pts", debug=True,
+                          output_dir=output_dir)
 
     # Q7: comparison plot
     plt.figure(figsize=(10, 5))
@@ -424,5 +449,5 @@ if __name__ == "__main__":
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig("eqm_comparison.png", dpi=150)
+    plt.savefig(output_dir / "eqm_comparison.png", dpi=150)
     plt.show()
