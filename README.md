@@ -30,6 +30,12 @@ Put together, they cover the three classical building blocks of geometric comput
 - **GitHub notebook rendering**: the ICP notebook originally used Plotly for interactive 3D plots, which GitHub's notebook viewer cannot render (it doesn't execute JavaScript). All 3D visualizations were converted to static Matplotlib figures and the notebook was re-executed, so the plots now display directly on GitHub. See that project's README for details, and for how to get interactivity back locally.
 - **Missing external data**: the Hough-transform notebook expects CT-scan `.tif` volumes that belong to the original course materials and are not redistributed here — see that project's README for the expected folder layout.
 
+## Related projects
+
+- [UR7e Reinforcement Learning Suite](https://github.com/devkumar-projects/UR7e-Reinforcement-Learning-Suite) — robot tracking with optical flow and state estimation.
+- [TurtleBot3 ROS 2 Navigation](https://github.com/devkumar-projects/TurtleBot3-ROS2-Navigation-Challenges) — mobile robot navigation with camera, LiDAR and odometry in simulation.
+- [UR5e RL Pick-and-Place](https://github.com/devkumar-projects/ur5e-ReinforcementLearning-pick-and-place) — reinforcement learning for robot manipulation in simulation.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
