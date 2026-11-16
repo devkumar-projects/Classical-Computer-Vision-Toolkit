@@ -64,6 +64,8 @@ pip install numpy matplotlib open3d
 
 ## How to run
 
+[View the executed Kaggle adaptation](https://www.kaggle.com/code/devkumarkaggle/3d-point-cloud-registration-with-icp) — an educational version using synthetic point clouds, with notes on experiment limitations.
+
 ```bash
 git clone https://github.com/devkumar-projects/Classical-Computer-Vision-Toolkit.git
 cd Classical-Computer-Vision-Toolkit/3d-point-cloud-registration-icp
